@@ -1,6 +1,7 @@
 import { MainLayout } from './components/Layout'
 import { TempoDisplay } from './components/TempoDisplay'
 import { BPMControl } from './components/BPMControl'
+import { PlayButton } from './components/PlayButton'
 import { useMetronomeStore } from './store/metronomeStore'
 
 function App() {
@@ -23,22 +24,9 @@ function App() {
           ))}
         </div>
 
-        {/* Play Button Placeholder - will be implemented in Phase 3 */}
-        <div className="flex justify-center">
-          <button
-            className="btn-primary w-24 h-24 rounded-full flex items-center justify-center text-4xl"
-            data-testid="play-button"
-            aria-label="Start metronome"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="w-12 h-12"
-            >
-              <path d="M8 5v14l11-7z" />
-            </svg>
-          </button>
+        {/* Play Button */}
+        <div className="flex justify-center" data-testid="play-button-container">
+          <PlayButton />
         </div>
 
         {/* BPM Control */}

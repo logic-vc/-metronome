@@ -12,17 +12,18 @@ class MockAudioContext {
   createOscillator() {
     return {
       type: 'sine',
-      frequency: { value: 440, setValueAtTime: () => {} },
+      frequency: { value: 440, setValueAtTime: () => {}, exponentialRampToValueAtTime: () => {} },
       connect: () => {},
       start: () => {},
       stop: () => {},
       disconnect: () => {},
+      onended: null as (() => void) | null,
     }
   }
 
   createGain() {
     return {
-      gain: { value: 1, setValueAtTime: () => {}, linearRampToValueAtTime: () => {} },
+      gain: { value: 1, setValueAtTime: () => {}, linearRampToValueAtTime: () => {}, exponentialRampToValueAtTime: () => {} },
       connect: () => {},
       disconnect: () => {},
     }

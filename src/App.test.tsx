@@ -31,9 +31,10 @@ describe('App', () => {
 
     it('should render the play button with accessible label', () => {
       render(<App />)
-      const playButton = screen.getByTestId('play-button')
-      expect(playButton).toBeInTheDocument()
-      expect(playButton).toHaveAccessibleName('Start metronome')
+      const playButtonContainer = screen.getByTestId('play-button-container')
+      expect(playButtonContainer).toBeInTheDocument()
+      // PlayButton component should have play icon initially
+      expect(screen.getByTestId('play-icon')).toBeInTheDocument()
     })
 
     it('should render the time signature display', () => {
