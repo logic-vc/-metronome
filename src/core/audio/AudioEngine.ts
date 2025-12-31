@@ -11,21 +11,28 @@ export class AudioEngine {
   private soundType: SoundType = 'click'
   private volume: number = 1
   private disposed: boolean = false
+  private initialized: boolean = false
 
   constructor() {
-    this.initContext()
+    // Don't initialize AudioContext in constructor - wait for user interaction
   }
 
   private initContext(): void {
-    if (this.disposed) return
+    if (this.disposed || this.initialized) return
 
     try {
-      this.context = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)()
+      const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
+      if (!AudioContextClass) {
+        console.warn('Web Audio API not supported')
+        return
+      }
+      this.context = new AudioContextClass()
       this.masterGain = this.context.createGain()
       this.masterGain.connect(this.context.destination)
       this.masterGain.gain.value = this.volume
-    } catch {
-      console.warn('Web Audio API not supported')
+      this.initialized = true
+    } catch (e) {
+      console.warn('Failed to initialize AudioContext:', e)
     }
   }
 
@@ -38,8 +45,14 @@ export class AudioEngine {
 
   /**
    * Resume the AudioContext (required after user interaction)
+   * This also initializes the context if not already done
    */
   async resume(): Promise<void> {
+    // Initialize context on first user interaction
+    if (!this.initialized) {
+      this.initContext()
+    }
+
     if (this.context?.state === 'suspended') {
       await this.context.resume()
     }
