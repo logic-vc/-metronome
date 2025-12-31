@@ -6,6 +6,7 @@
 import { TimingEngine } from './timing/TimingEngine'
 import { AudioEngine } from './audio/AudioEngine'
 import { useMetronomeStore, type TimeSignature } from '@/store/metronomeStore'
+import { getSubdivisionMultiplier } from './utils/subdivision'
 
 // Time signature to beats per measure mapping
 const TIME_SIGNATURE_BEATS: Record<TimeSignature, number> = {
@@ -23,6 +24,7 @@ class MetronomeControllerClass {
   private timingEngine: TimingEngine
   private audioEngine: AudioEngine
   private currentBeat: number = 0
+  private currentSubBeat: number = 0
   private unsubscribe: (() => void) | null = null
 
   constructor() {
@@ -47,7 +49,15 @@ class MetronomeControllerClass {
 
       // Handle BPM changes while playing
       if (state.isPlaying && state.bpm !== prevState.bpm) {
-        this.timingEngine.setBpm(state.bpm)
+        const multiplier = getSubdivisionMultiplier(state.subdivision)
+        this.timingEngine.setBpm(state.bpm * multiplier)
+      }
+
+      // Handle subdivision changes while playing
+      if (state.isPlaying && state.subdivision !== prevState.subdivision) {
+        const multiplier = getSubdivisionMultiplier(state.subdivision)
+        this.timingEngine.setBpm(state.bpm * multiplier)
+        this.currentSubBeat = 0
       }
 
       // Handle sound type changes
@@ -66,20 +76,37 @@ class MetronomeControllerClass {
   }
 
   private startInternal(): void {
-    const { bpm, timeSignature, accentEnabled } = useMetronomeStore.getState()
+    const { bpm, timeSignature, subdivision, accentEnabled } = useMetronomeStore.getState()
     const beatsPerMeasure = TIME_SIGNATURE_BEATS[timeSignature]
+    const multiplier = getSubdivisionMultiplier(subdivision)
+    const effectiveBpm = bpm * multiplier
 
     this.currentBeat = 0
+    this.currentSubBeat = 0
 
-    this.timingEngine.start(bpm, () => {
-      const isAccent = accentEnabled && this.currentBeat === 0
-      this.audioEngine.playClick(isAccent)
+    this.timingEngine.start(effectiveBpm, () => {
+      // Check if this is a main beat (not a subdivision)
+      const isMainBeat = this.currentSubBeat === 0
+      // Accent only on first beat of measure AND first sub-beat
+      const isAccent = accentEnabled && this.currentBeat === 0 && isMainBeat
 
-      // Update store with current beat
-      useMetronomeStore.getState().setCurrentBeat(this.currentBeat)
+      // Play click - main beats are louder than subdivisions
+      if (isMainBeat) {
+        this.audioEngine.playClick(isAccent)
+        // Update store with current beat (only on main beats)
+        useMetronomeStore.getState().setCurrentBeat(this.currentBeat)
+      } else {
+        // Subdivision click (softer)
+        this.audioEngine.playClick(false)
+      }
 
-      // Advance beat counter
-      this.currentBeat = (this.currentBeat + 1) % beatsPerMeasure
+      // Advance sub-beat counter
+      this.currentSubBeat = (this.currentSubBeat + 1) % multiplier
+
+      // Advance main beat counter when sub-beats complete
+      if (this.currentSubBeat === 0) {
+        this.currentBeat = (this.currentBeat + 1) % beatsPerMeasure
+      }
     })
   }
 
@@ -95,6 +122,7 @@ class MetronomeControllerClass {
   private stopInternal(): void {
     this.timingEngine.stop()
     this.currentBeat = 0
+    this.currentSubBeat = 0
   }
 
   /**
