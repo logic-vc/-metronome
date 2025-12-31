@@ -11,7 +11,7 @@ describe('App', () => {
 
     it('should render the BPM display', () => {
       render(<App />)
-      expect(screen.getByTestId('bpm-display')).toBeInTheDocument()
+      expect(screen.getByTestId('tempo-bpm')).toBeInTheDocument()
     })
 
     it('should render the tempo name', () => {
@@ -45,7 +45,7 @@ describe('App', () => {
     it('should render the subdivision display', () => {
       render(<App />)
       expect(screen.getByTestId('subdivision')).toBeInTheDocument()
-      expect(screen.getByText('Quarter')).toBeInTheDocument()
+      expect(screen.getByText('quarter')).toBeInTheDocument()
     })
 
     it('should render the footer', () => {
