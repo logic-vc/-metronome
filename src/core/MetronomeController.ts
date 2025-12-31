@@ -146,5 +146,9 @@ export const metronomeController = new MetronomeControllerClass()
 
 // Initialize on first import (will be lazy loaded)
 if (typeof window !== 'undefined') {
-  metronomeController.init()
+  try {
+    metronomeController.init()
+  } catch (e) {
+    console.error('Failed to initialize MetronomeController:', e)
+  }
 }
