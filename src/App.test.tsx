@@ -19,11 +19,12 @@ describe('App', () => {
       expect(screen.getByTestId('tempo-name')).toBeInTheDocument()
     })
 
-    it('should render the beat display with 4 pads', () => {
+    it('should render the beat display with 4 pads by default', () => {
       render(<App />)
       const beatDisplay = screen.getByTestId('beat-display')
       expect(beatDisplay).toBeInTheDocument()
 
+      // Default time signature is 4/4, so 4 pads
       for (let i = 1; i <= 4; i++) {
         expect(screen.getByTestId(`beat-pad-${i}`)).toBeInTheDocument()
       }
@@ -37,16 +38,23 @@ describe('App', () => {
       expect(screen.getByTestId('play-icon')).toBeInTheDocument()
     })
 
-    it('should render the time signature display', () => {
+    it('should render time signature selector', () => {
       render(<App />)
-      expect(screen.getByTestId('time-signature')).toBeInTheDocument()
-      expect(screen.getByText('4/4')).toBeInTheDocument()
+      // Time signature selector should show all options
+      expect(screen.getByTestId('time-sig-4/4')).toBeInTheDocument()
     })
 
-    it('should render the subdivision display', () => {
+    it('should render subdivision selector', () => {
       render(<App />)
-      expect(screen.getByTestId('subdivision')).toBeInTheDocument()
-      expect(screen.getByText('quarter')).toBeInTheDocument()
+      // Subdivision selector should show Quarter option
+      expect(screen.getByTestId('subdivision-quarter')).toBeInTheDocument()
+    })
+
+    it('should render sound selector', () => {
+      render(<App />)
+      // Sound selector should show click and wood options
+      expect(screen.getByTestId('sound-click')).toBeInTheDocument()
+      expect(screen.getByTestId('sound-wood')).toBeInTheDocument()
     })
 
     it('should render the footer', () => {
